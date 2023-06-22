@@ -9,6 +9,35 @@
   padding: 2em;
 }
 
-.read-the-docs {
-  color: #888;
+table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table caption {
+  float: left;
+  font-size: 120%;
+}
+
+tbody td {
+  background-color: #444;
+  width: 24%;
+  position: relative;
+  border: 1px solid #111;
+
+  text-align: center;
+
+  overflow: hidden;
+}
+
+tbody tr {
+  line-height: 0%;
+}
+
+tbody td:after{
+  content:'';
+  display:inline-block;
+  margin-top: 100%;
+  vertical-align: middle;
 }
