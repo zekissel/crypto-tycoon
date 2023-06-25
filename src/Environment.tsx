@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
+import Machine from "./Machine";
 
 interface EnvProps {
     curLoc: number;
     setCurLoc: React.Dispatch<React.SetStateAction<number>>;
     ownedLoc: boolean[];
+    balance: number;
+    setBalance: React.Dispatch<React.SetStateAction<number>>;
+}
+
+interface LocationProps {
     balance: number;
     setBalance: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -23,44 +29,39 @@ function Environment ({ curLoc, setCurLoc, ownedLoc, balance, setBalance }: EnvP
             <select onChange={changeStage}>
                 { ownedLoc.map((v, i) => { return v && <option key={i} value={i}>{stage[i]}</option> }) }
             </select>
-            { curLoc == 0 && <Basement /> }
-            { curLoc == 1 && <Apartment /> }
+            { curLoc == 0 && <Basement balance={balance} setBalance={setBalance} /> }
+            { curLoc == 1 && <Apartment balance={balance} setBalance={setBalance} /> }
         </>
     )
 }
 
-function Basement () {
+function Basement ({ balance, setBalance }: LocationProps) {
+
+    const [machines, setMachines] = useState([[0, 0, 0], [0, 0 ,0], [0, 0, 0], [0, 0, 0]]);
 
     return (
         <table>
             <tbody>
                 <tr>
-                    <td>1</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    { machines.map((v, i) => { return <td key={i}><Machine index={i} saves={machines} setSave={setMachines} balance={balance} setBalance={setBalance} /></td> }) }
                 </tr>
             </tbody>
         </table>
     )
 }
 
-function Apartment () {
+function Apartment ({ balance, setBalance }: LocationProps) {
+
+    const [machines, setMachines] = useState([[0, 0, 0], [0, 0 ,0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0 ,0], [0, 0, 0], [0, 0, 0]]);
 
     return (
         <table>
             <tbody>
                 <tr>
-                    <td>2</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    { machines.map((v, i) => { return i < 4 && <td key={i}><Machine index={i} saves={machines} setSave={setMachines} balance={balance} setBalance={setBalance} /></td> })}
                 </tr>
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    { machines.map((v, i) => { return i >= 4 && <td key={i}><Machine index={i} saves={machines} setSave={setMachines} balance={balance} setBalance={setBalance} /></td> })}
                 </tr>
             </tbody>
         </table>
