@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Machine from "./Machine";
 
 interface EnvProps {
@@ -7,16 +7,22 @@ interface EnvProps {
     ownedLoc: boolean[];
     balance: number;
     setBalance: React.Dispatch<React.SetStateAction<number>>;
+    m0: number[][];
+    s0: React.Dispatch<React.SetStateAction<number[][]>>;
+    m1: number[][];
+    s1: React.Dispatch<React.SetStateAction<number[][]>>;
 }
 
 interface LocationProps {
     balance: number;
     setBalance: React.Dispatch<React.SetStateAction<number>>;
+    machines: number[][];
+    setMachines: React.Dispatch<React.SetStateAction<number[][]>>;
 }
 
 const stage = ['Mom\'s Basement', 'Studio Apartment', 'Mobile Home', 'Twin Condo', 'Log Cabin', 'Tudor Style', 'Victorian', 'Luxury Suite', 'Mountain Retreat'];
 
-function Environment ({ curLoc, setCurLoc, ownedLoc, balance, setBalance }: EnvProps) {
+function Environment ({ curLoc, setCurLoc, ownedLoc, balance, setBalance, m0, s0, m1, s1 }: EnvProps) {
     
     const changeStage = (e: any) => {
         const index = e.target.value;
@@ -29,15 +35,13 @@ function Environment ({ curLoc, setCurLoc, ownedLoc, balance, setBalance }: EnvP
             <select onChange={changeStage}>
                 { ownedLoc.map((v, i) => { return v && <option key={i} value={i}>{stage[i]}</option> }) }
             </select>
-            { curLoc == 0 && <Basement balance={balance} setBalance={setBalance} /> }
-            { curLoc == 1 && <Apartment balance={balance} setBalance={setBalance} /> }
+            { curLoc == 0 && <Basement balance={balance} setBalance={setBalance} machines={m0} setMachines={s0} /> }
+            { curLoc == 1 && <Apartment balance={balance} setBalance={setBalance} machines={m1} setMachines={s1} /> }
         </>
     )
 }
 
-function Basement ({ balance, setBalance }: LocationProps) {
-
-    const [machines, setMachines] = useState([[0, 0, 0], [0, 0 ,0], [0, 0, 0], [0, 0, 0]]);
+function Basement ({ balance, setBalance, machines, setMachines }: LocationProps) {
 
     return (
         <table>
@@ -50,9 +54,7 @@ function Basement ({ balance, setBalance }: LocationProps) {
     )
 }
 
-function Apartment ({ balance, setBalance }: LocationProps) {
-
-    const [machines, setMachines] = useState([[0, 0, 0], [0, 0 ,0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0 ,0], [0, 0, 0], [0, 0, 0]]);
+function Apartment ({ balance, setBalance, machines, setMachines }: LocationProps) {
 
     return (
         <table>
