@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Upgrade from "./Upgrade";
 
 interface MachineProps {
     index: number;
@@ -103,7 +104,7 @@ function MachineUI ({ index, save, setSave, balance, setBalance}: UIProps) {
             { save[index][0] == 1 && <button onClick={manMine}>Mine</button> }
             { save[index][0] == 2 && <SemiMine save={save} index={index} balance={balance} setBalance={setBalance}/> }
             <h4>Wage: {save[index][1]} | Cooldown: {save[index][2] / 1000.00} s</h4>
-            <button>Options (upgrade, move sell)</button>
+            <Upgrade index={index} save={save} setSave={setSave} balance={balance} setBalance={setBalance} />
         </>
     )
 }
