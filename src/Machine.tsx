@@ -1,160 +1,172 @@
-import { useState, useEffect } from "react";
-import Upgrade from "./Upgrade";
+import { useEffect, useState } from "react";
+import { Phase } from "./m_arrays";
 
 interface MachineProps {
+    balance: number;
+    setBalance: React.Dispatch<React.SetStateAction<number>>;
+    per2sec: number;
+    setPer2: React.Dispatch<React.SetStateAction<number>>;
+    semi: number[][][];
+    setSemi: React.Dispatch<React.SetStateAction<number[][][]>>;
+
+    curLoc: number;
+    section: number;
     index: number;
-    saves: number[][];
-    setSave: React.Dispatch<React.SetStateAction<number[][]>>;
-
-    balance: number;
-    setBalance: React.Dispatch<React.SetStateAction<number>>;
+    machines: (number | boolean)[][][][];
+    setMachines: React.Dispatch<React.SetStateAction<(number | boolean)[][][][]>>;
 }
 
-interface PurchaseProps {
-    index: number;
-    saves: number[][];
-    setSave: React.Dispatch<React.SetStateAction<number[][]>>;
+function Auto ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
 
-    balance: number;
-    setBalance: React.Dispatch<React.SetStateAction<number>>;
-    toggle: () => void;
-}
-
-interface UIProps {
-    index: number;
-    save: number[][];
-    setSave: React.Dispatch<React.SetStateAction<number[][]>>;
-    balance: number;
-    setBalance: React.Dispatch<React.SetStateAction<number>>;
-}
-
-interface AutoProps {
-    wage: number;
-    cool: number;
-    balance: number;
-    setBalance: React.Dispatch<React.SetStateAction<number>>;
-    toggle: () => void;
-}
-
-interface SemiProps {
-    save: number[][];
-    index: number;
-    balance: number;
-    setBalance: React.Dispatch<React.SetStateAction<number>>;
-}
-
-function AutoMine ({wage, cool, balance, setBalance, toggle}: AutoProps) {
-  
-    useEffect(() => {
-
-        const interval = setInterval(() => {
-            setBalance(balance + wage);
-        }, cool);
-  
-        return () => clearInterval(interval);
-    }, [balance, wage, cool]);
-  
-    return <button onClick={toggle}>Stop</button>;
-}
-
-function SemiMine ({ balance, setBalance, save, index }: SemiProps) {
-
-    const [load, setLoad] = useState(0);
-
-    useEffect(() => {
-
-        const interval = setInterval(() => {
-            if (load < 5000) setLoad(load + save[index][1]);
-        }, save[index][2]);
-        return () => clearInterval(interval);
-    });
-
-
-    const collect = () => {
-        setBalance(balance + load);
-        setLoad(0);
+    const [wage, setWage] = useState(0);
+    const toggleMine = () => {
+        let factor: number = Math.round((Number(machines[curLoc][section][index][2]) * 2000 / Number(machines[curLoc][section][index][4])));
+        if (wage === 0) { setPer2(per2sec + factor); setWage(factor); }
+        else { setPer2(per2sec - wage); setWage(0); }
     }
 
     return (
         <>
-            <button onClick={collect}>Collect - {load}</button>
+            <button onClick={toggleMine}>{ wage !== 0 ? "Stop Mining" : "Auto Mine" }</button>
         </>
     )
 }
 
-function MachineUI ({ index, save, setSave, balance, setBalance}: UIProps) {
+function Semi ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
 
-    const [mining, setMining] = useState(false);
+    const [wage, setWage] = useState(0);
     const toggleMine = () => {
-        setMining(!mining);
+        let factor: number = Math.round((Number(machines[curLoc][section][index][2]) * 2000 / Number(machines[curLoc][section][index][4])));
+        if (wage === 0) { 
+            const newSemi = [...semi];
+            newSemi[curLoc][section][index] = factor;
+            setSemi(newSemi);
+            setWage(factor); 
+        } else { 
+            const newSemi = [...semi];
+            newSemi[curLoc][section][index] = 0;
+            setSemi(newSemi);
+            setWage(0); 
+        }
     }
 
-    const manMine = (e: any) => {
+    const collect = () => {
+        const machs = [...machines];
+        setBalance(balance + Number(machines[curLoc][section][index][6]))
+        machs[curLoc][section][index][6] = 0;
+        setMachines(machs);
+    }
+
+    return (
+        <>
+            <button onClick={toggleMine}>{ wage !== 0 ? "Stop Mining" : "Semi Mine" }</button>
+            { wage !== 0 && <button onClick={collect}>Collect - { machines[curLoc][section][index][6] }</button> }
+        </>
+    )
+}
+
+function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
+
+    const cap: number = machines[curLoc][section][index][1] ? 5 : 10;
+    const buyMod = (e: any) => {
+        let val = Number(e.target.value);
+        let cost = (cap - Number(machines[curLoc][section][index][val + 1])) * 2 ** 10;
+        if (Number(machines[curLoc][section][index][val + 1]) > 0 && balance >= cost) {
+            let nerf: boolean = Number(machines[curLoc][section][index][val + 1]) > 5;
+            let machs = [...machines];
+            machs[curLoc][section][index][val + 1] = Number(machs[curLoc][section][index][val + 1]) - 1;
+            switch(val) {
+                case 2: machs[curLoc][section][index][val] = Math.round(Number(machs[curLoc][section][index][val]) * (nerf ? 1.5 : 2)); break;
+                case 4: machs[curLoc][section][index][val] = Number(machs[curLoc][section][index][val]) - 150; break;
+                default: break;
+            }
+            setMachines(machs);
+            setBalance(balance - cost);
+        }
+    }
+
+    const nextGen = () => {
+        const machs = [...machines];
+        switch (Number(machines[curLoc][section][index][0])) {
+            case Phase.Manual: machs[curLoc][section][index][0] = Phase.Semi; break;
+            case Phase.Semi: machs[curLoc][section][index][0] = Phase.Auto; break;
+            default: break;
+        }
+        setMachines(machs);
+    }
+
+    const manual = (e: any) => {
         const btn = (e.target as HTMLButtonElement);
         btn.disabled = true;
         setTimeout(() => {
             btn.disabled = false;
-        }, save[index][2])
-        setBalance(balance + save[index][1]);
+        }, Number(machines[curLoc][section][index][4]))
+        setBalance(balance + Number(machines[curLoc][section][index][2]));
     }
 
     return (
         <>
-            { save[index][3] == 1 && <h3>Laptop</h3> } { save[index][3] == 2 && <h3>Desktop</h3> }
-            { save[index][0] == 1 && <button onClick={manMine}>Mine</button> }
-            { save[index][0] == 2 && <SemiMine save={save} index={index} balance={balance} setBalance={setBalance}/> }
-            <h4>Wage: {save[index][1]} | Cooldown: {save[index][2] / 1000.00} s</h4>
-            <Upgrade index={index} save={save} setSave={setSave} balance={balance} setBalance={setBalance} />
+            { machines[curLoc][section][index][1] ? <h3>Laptop</h3> : <h3>Desktop</h3> }
+
+            { machines[curLoc][section][index][0] === Phase.Manual && <button onClick={manual}>Mine</button> }
+            { machines[curLoc][section][index][0] === Phase.Semi &&
+                <Semi balance={balance} setBalance={setBalance} 
+                per2sec={per2sec} setPer2={setPer2}
+                semi={semi} setSemi={setSemi}
+                curLoc={curLoc} section={section} index={index} 
+                machines={machines} setMachines={setMachines}/> 
+            }
+            { machines[curLoc][section][index][0] === Phase.Auto &&
+                <Auto balance={balance} setBalance={setBalance}
+                per2sec={per2sec} setPer2={setPer2}
+                semi={semi} setSemi={setSemi}
+                curLoc={curLoc} section={section} index={index} 
+                machines={machines} setMachines={setMachines}/> 
+            }
+
+            <button onClick={nextGen}>Upgrade</button>
+
+            <h5>Wage: { machines[curLoc][section][index][2] } | <button value={2} onClick={buyMod}>+{ machines[curLoc][section][index][1] ? "eGPU" : "GPU" } -${ (cap - Number(machines[curLoc][section][index][3])) * 2 ** 10 }</button> | { cap - Number(machines[curLoc][section][index][3]) } / { cap } { machines[curLoc][section][index][1] ? "eGPU" : "GPU" }</h5>
+            <h5>Cooldown: { Number(machines[curLoc][section][index][4]) / 1000.0}s | <button value={4} onClick={buyMod}>+Fan -${ (cap - Number(machines[curLoc][section][index][3])) * 2 ** 10 }</button> | { cap - Number(machines[curLoc][section][index][5]) } / { cap } Fans</h5>
+
         </>
     )
 }
 
-function PurchaseOptions ({ index, saves, setSave, balance, setBalance, toggle }: PurchaseProps) {
+function Machine ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
 
-    const buyLaptop = () => {
-        if (balance >= 500) {
-            const newSave: number[][] = [...saves];
-            newSave[index][0] = 1;
-            newSave[index][1] = 10;
-            newSave[index][2] = 2500;
-            newSave[index][3] = 1;
-            setSave(newSave);
-            setBalance(balance - 500);
-        }
-    }
-
-    const buyDesktop = () => {
-        if (balance >= 1500) {
-            const newSave: number[][] = [...saves];
-            newSave[index][0] = 2;
-            newSave[index][1] = 25;
-            newSave[index][2] = 1500;
-            newSave[index][3] = 2;
-            setSave(newSave);
-            setBalance(balance - 1500);
+    const buyMachine = (e: any) => {
+        let target: number = Number(e.target.value);
+        if (balance >= target) {
+            const mach = [...machines];
+            mach[curLoc][section][index][0] = Phase.Manual;
+            if (target === 5000) { /* adjust identifier, wage, cooldown, and upgrades for Desktops */
+                mach[curLoc][section][index][1] = false;
+                mach[curLoc][section][index][2] = 15;
+                mach[curLoc][section][index][3] = 10;
+                mach[curLoc][section][index][5] = 10;
+            }
+            setMachines(mach);
+            setBalance(balance - target);
         }
     }
 
     return (
         <>
-            <button onClick={buyLaptop}>Laptop $500</button>
-            <button onClick={buyDesktop}>Desktop $1500</button>
-            <button onClick={toggle}>&lt;</button>
-        </>
-    )
-}
-
-function Machine ({ index, saves, setSave, balance, setBalance }: MachineProps) {
-
-    const [options, setOptions] = useState(false);
-    const toggleOptions = () => { setOptions(!options) }
-
-    return (
-        <>
-            { saves[index][0] == 0 && !options && <button onClick={toggleOptions}>+</button> }
-            { saves[index][0] == 0 && options && <PurchaseOptions index={index} saves={saves} setSave={setSave}
-                                                                     balance={balance} setBalance={setBalance} toggle={toggleOptions} /> }
-            { saves[index][0] > 0 && <MachineUI index={index} save={saves} setSave={setSave} balance={balance} setBalance={setBalance} />}
+            { machines[curLoc][section][index][0] === Phase.None && 
+            <>
+                <h3>Purchase Machine:</h3>
+                <button value={1000} onClick={buyMachine}>Laptop (1000)</button> 
+                <button value={5000} onClick={buyMachine}>Desktop (5000)</button>
+            </>
+            }
+            { machines[curLoc][section][index][0] !== Phase.None && 
+                <MachineUI balance={balance} setBalance={setBalance}
+                    per2sec={per2sec} setPer2={setPer2}
+                    semi={semi} setSemi={setSemi}
+                    curLoc={curLoc} section={section} index={index} 
+                    machines={machines} setMachines={setMachines}/> 
+            } 
         </>
     )
 }

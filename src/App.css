@@ -9,6 +9,10 @@
   padding: 2em;
 }
 
+ul {
+  list-style-type: none;
+}
+
 table {
   table-layout: fixed;
   width: 100%;
