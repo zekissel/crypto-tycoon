@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Phase } from "./m_arrays";
 
 interface MachineProps {
@@ -16,7 +16,30 @@ interface MachineProps {
     setMachines: React.Dispatch<React.SetStateAction<(number | boolean)[][][][]>>;
 }
 
-function Auto ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
+interface SemiProps {
+    balance: number;
+    setBalance: React.Dispatch<React.SetStateAction<number>>;
+    semi: number[][][];
+    setSemi: React.Dispatch<React.SetStateAction<number[][][]>>;
+
+    curLoc: number;
+    section: number;
+    index: number;
+    machines: (number | boolean)[][][][];
+    setMachines: React.Dispatch<React.SetStateAction<(number | boolean)[][][][]>>;
+}
+
+interface AutoProps {
+    per2sec: number;
+    setPer2: React.Dispatch<React.SetStateAction<number>>;
+
+    curLoc: number;
+    section: number;
+    index: number;
+    machines: (number | boolean)[][][][];
+}
+
+function Auto ({ per2sec, setPer2, curLoc, section, index, machines }: AutoProps) {
 
     const [wage, setWage] = useState(0);
     const toggleMine = () => {
@@ -32,7 +55,7 @@ function Auto ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, s
     )
 }
 
-function Semi ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
+function Semi ({ balance, setBalance, semi, setSemi, curLoc, section, index, machines, setMachines }: SemiProps) {
 
     const [wage, setWage] = useState(0);
     const toggleMine = () => {
@@ -43,6 +66,7 @@ function Semi ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, s
             setSemi(newSemi);
             setWage(factor); 
         } else { 
+            collect();
             const newSemi = [...semi];
             newSemi[curLoc][section][index] = 0;
             setSemi(newSemi);
@@ -110,18 +134,15 @@ function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curL
 
             { machines[curLoc][section][index][0] === Phase.Manual && <button onClick={manual}>Mine</button> }
             { machines[curLoc][section][index][0] === Phase.Semi &&
-                <Semi balance={balance} setBalance={setBalance} 
-                per2sec={per2sec} setPer2={setPer2}
+                <Semi balance={balance} setBalance={setBalance}
                 semi={semi} setSemi={setSemi}
                 curLoc={curLoc} section={section} index={index} 
                 machines={machines} setMachines={setMachines}/> 
             }
             { machines[curLoc][section][index][0] === Phase.Auto &&
-                <Auto balance={balance} setBalance={setBalance}
-                per2sec={per2sec} setPer2={setPer2}
-                semi={semi} setSemi={setSemi}
+                <Auto per2sec={per2sec} setPer2={setPer2}
                 curLoc={curLoc} section={section} index={index} 
-                machines={machines} setMachines={setMachines}/> 
+                machines={machines} /> 
             }
 
             <button onClick={nextGen}>Upgrade</button>
