@@ -3,10 +3,10 @@ import Machine from "./Machine";
 interface EnvProps {
     balance: number;
     setBalance: React.Dispatch<React.SetStateAction<number>>;
-    per2sec: number;
-    setPer2: React.Dispatch<React.SetStateAction<number>>;
     semi: number[][][];
     setSemi: React.Dispatch<React.SetStateAction<number[][][]>>;
+    auto: number[][][];
+    setAuto: React.Dispatch<React.SetStateAction<number[][][]>>;
 
     curLoc: number;
     setCurLoc: React.Dispatch<React.SetStateAction<number>>;
@@ -18,7 +18,7 @@ interface EnvProps {
     setMachines: React.Dispatch<React.SetStateAction<(number | boolean)[][][][]>>;
 }
 
-function Environment ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, setCurLoc, locations, machines, setMachines }: EnvProps) {
+function Environment ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc, setCurLoc, locations, machines, setMachines }: EnvProps) {
     
     const changeStage = (e: any) => {
         setCurLoc(e.target.value);
@@ -35,8 +35,8 @@ function Environment ({ balance, setBalance, per2sec, setPer2, semi, setSemi, cu
                         { 
                             machines[curLoc].map((machs, ind) => { 
                                 return (<tr key={ind}>{ machs.map((_v, i) => { 
-                                    return <td key={i}><Machine balance={balance} setBalance={setBalance} per2sec={per2sec} setPer2={setPer2} 
-                                                                semi={semi} setSemi={setSemi}
+                                    return <td key={i}><Machine balance={balance} setBalance={setBalance}
+                                                                semi={semi} setSemi={setSemi} auto={auto} setAuto={setAuto}
                                                                 curLoc={curLoc} section={ind} index={i} 
                                                                 machines={machines} setMachines={setMachines}/></td>
                                 }) }</tr>)

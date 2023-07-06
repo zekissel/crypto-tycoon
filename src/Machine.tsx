@@ -4,8 +4,8 @@ import { Phase } from "./m_arrays";
 interface MachineProps {
     balance: number;
     setBalance: React.Dispatch<React.SetStateAction<number>>;
-    per2sec: number;
-    setPer2: React.Dispatch<React.SetStateAction<number>>;
+    auto: number[][][];
+    setAuto: React.Dispatch<React.SetStateAction<number[][][]>>;
     semi: number[][][];
     setSemi: React.Dispatch<React.SetStateAction<number[][][]>>;
 
@@ -30,8 +30,8 @@ interface SemiProps {
 }
 
 interface AutoProps {
-    per2sec: number;
-    setPer2: React.Dispatch<React.SetStateAction<number>>;
+    auto: number[][][];
+    setAuto: React.Dispatch<React.SetStateAction<number[][][]>>;
 
     curLoc: number;
     section: number;
@@ -39,25 +39,31 @@ interface AutoProps {
     machines: (number | boolean)[][][][];
 }
 
-function Auto ({ per2sec, setPer2, curLoc, section, index, machines }: AutoProps) {
+function Auto ({ auto, setAuto, curLoc, section, index, machines }: AutoProps) {
 
-    const [wage, setWage] = useState(0);
     const toggleMine = () => {
         let factor: number = Math.round((Number(machines[curLoc][section][index][2]) * 2000 / Number(machines[curLoc][section][index][4])));
-        if (wage === 0) { setPer2(per2sec + factor); setWage(factor); }
-        else { setPer2(per2sec - wage); setWage(0); }
+        if (auto[curLoc][section][index] === 0) { 
+            const newAuto = [...auto];
+            newAuto[curLoc][section][index] = factor;
+            setAuto(newAuto);
+        } else {
+            const newAuto = [...auto];
+            newAuto[curLoc][section][index] = 0;
+            setAuto(newAuto);
+        }
     }
 
     return (
         <>
-            <button onClick={toggleMine}>{ wage !== 0 ? "Stop Mining" : "Auto Mine" }</button>
+            <button onClick={toggleMine}>{ auto[curLoc][section][index] !== 0 ? "Stop Mining" : "Auto Mine" }</button>
         </>
     )
 }
 
 function Semi ({ balance, setBalance, semi, setSemi, curLoc, section, index, machines, setMachines }: SemiProps) {
 
-    const [wage, setWage] = useState(0);
+    const [wage, setWage] = useState(Number(machines[curLoc][section][index][6]));
     const toggleMine = () => {
         let factor: number = Math.round((Number(machines[curLoc][section][index][2]) * 2000 / Number(machines[curLoc][section][index][4])));
         if (wage === 0) { 
@@ -89,7 +95,7 @@ function Semi ({ balance, setBalance, semi, setSemi, curLoc, section, index, mac
     )
 }
 
-function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
+function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc, section, index, machines, setMachines }: MachineProps) {
 
     const cap: number = machines[curLoc][section][index][1] ? 5 : 10;
     const buyMod = (e: any) => {
@@ -121,7 +127,12 @@ function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curL
             const machs = [...machines];
             switch (Number(machines[curLoc][section][index][0])) {
                 case Phase.Manual: machs[curLoc][section][index][0] = Phase.Semi; break;
-                case Phase.Semi: machs[curLoc][section][index][0] = Phase.Auto; break;
+                case Phase.Semi: 
+                    machs[curLoc][section][index][0] = Phase.Auto;
+                    const newSemi = [...semi];
+                    newSemi[curLoc][section][index] = 0;
+                    setSemi(newSemi);
+                    break;
                 default: break;
             }
             setMachines(machs);
@@ -150,7 +161,7 @@ function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curL
                 machines={machines} setMachines={setMachines}/> 
             }
             { machines[curLoc][section][index][0] === Phase.Auto &&
-                <Auto per2sec={per2sec} setPer2={setPer2}
+                <Auto auto={auto} setAuto={setAuto}
                 curLoc={curLoc} section={section} index={index} 
                 machines={machines} /> 
             }
@@ -164,7 +175,7 @@ function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curL
     )
 }
 
-function Machine ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc, section, index, machines, setMachines }: MachineProps) {
+function Machine ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc, section, index, machines, setMachines }: MachineProps) {
 
     const buyMachine = (e: any) => {
         let target: number = Number(e.target.value);
@@ -193,8 +204,8 @@ function Machine ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curLoc
             }
             { machines[curLoc][section][index][0] !== Phase.None && 
                 <MachineUI balance={balance} setBalance={setBalance}
-                    per2sec={per2sec} setPer2={setPer2}
                     semi={semi} setSemi={setSemi}
+                    auto={auto} setAuto={setAuto}
                     curLoc={curLoc} section={section} index={index} 
                     machines={machines} setMachines={setMachines}/> 
             } 
