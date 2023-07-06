@@ -109,14 +109,24 @@ function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curL
         }
     }
 
+    let gen: string = "Manual";
+    let cost: number = 250;
+    switch (machines[curLoc][section][index][0]) {
+        case Phase.Semi: gen = "Semi"; cost = 2500; break;
+        case Phase.Auto: gen = "Auto"; cost = 0; break;
+        default: break;
+    }
     const nextGen = () => {
-        const machs = [...machines];
-        switch (Number(machines[curLoc][section][index][0])) {
-            case Phase.Manual: machs[curLoc][section][index][0] = Phase.Semi; break;
-            case Phase.Semi: machs[curLoc][section][index][0] = Phase.Auto; break;
-            default: break;
+        if (balance >= cost) {
+            const machs = [...machines];
+            switch (Number(machines[curLoc][section][index][0])) {
+                case Phase.Manual: machs[curLoc][section][index][0] = Phase.Semi; break;
+                case Phase.Semi: machs[curLoc][section][index][0] = Phase.Auto; break;
+                default: break;
+            }
+            setMachines(machs);
+            setBalance(balance - cost);
         }
-        setMachines(machs);
     }
 
     const manual = (e: any) => {
@@ -145,10 +155,10 @@ function MachineUI ({ balance, setBalance, per2sec, setPer2, semi, setSemi, curL
                 machines={machines} /> 
             }
 
-            <button onClick={nextGen}>Upgrade</button>
+            <h5>Gen: { gen } | { cost !== 0 && <button onClick={nextGen}>Upgrade -${ cost }</button> }</h5>
 
-            <h5>Wage: { machines[curLoc][section][index][2] } | <button value={2} onClick={buyMod}>+{ machines[curLoc][section][index][1] ? "eGPU" : "GPU" } -${ (cap - Number(machines[curLoc][section][index][3])) * 2 ** 10 }</button> | { cap - Number(machines[curLoc][section][index][3]) } / { cap } { machines[curLoc][section][index][1] ? "eGPU" : "GPU" }</h5>
-            <h5>Cooldown: { Number(machines[curLoc][section][index][4]) / 1000.0}s | <button value={4} onClick={buyMod}>+Fan -${ (cap - Number(machines[curLoc][section][index][3])) * 2 ** 10 }</button> | { cap - Number(machines[curLoc][section][index][5]) } / { cap } Fans</h5>
+            <h5>Wage: { machines[curLoc][section][index][2] } { Number(machines[curLoc][section][index][3]) > 0 && <button value={2} onClick={buyMod}>+{ machines[curLoc][section][index][1] ? "eGPU" : "GPU" } -${ (cap - Number(machines[curLoc][section][index][3])) * 2 ** 10 }</button> } | { cap - Number(machines[curLoc][section][index][3]) } / { cap } { machines[curLoc][section][index][1] ? "eGPU" : "GPU" }</h5>
+            <h5>Cooldown: { Number(machines[curLoc][section][index][4]) / 1000.0}s { Number(machines[curLoc][section][index][5]) > 0 && <button value={4} onClick={buyMod}>+Fan -${ (cap - Number(machines[curLoc][section][index][3])) * 2 ** 10 }</button> } | { cap - Number(machines[curLoc][section][index][5]) } / { cap } Fans</h5>
 
         </>
     )

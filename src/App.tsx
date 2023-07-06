@@ -7,7 +7,7 @@ import Shop from './Shop';
 
 function App() {
 
-  const [balance, setBalance] = useState(10000);
+  const [balance, setBalance] = useState(100000);
   const [per2sec, setPer2] = useState(0);
   const [semi, setSemi] = useState(semiBoard);
 
