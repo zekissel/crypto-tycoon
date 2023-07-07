@@ -35,7 +35,7 @@ export enum Phase {
     Semi,
     Auto
 }
-// [<phase>(0), <isLaptop>(1), <wage>(2), <wage upgrades left>(3), <cooldown>(4), <cooldown upgrades left>(5), <semi-miner bank>(6)]
+// [<phase>(0), <isLaptop>(1), <wage>(2), <wage upgrades left>(3), <cooldown>(4), <cooldown upgrades left>(5), <semi-miner vault>(6)]
 const mach0 = [
     [[Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0]]
 ];

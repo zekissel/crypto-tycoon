@@ -43,7 +43,7 @@ function Auto ({ auto, setAuto, curLoc, section, index, machines }: AutoProps) {
 
     const toggleMine = () => {
         let factor: number = Math.round((Number(machines[curLoc][section][index][2]) * 2000 / Number(machines[curLoc][section][index][4])));
-        if (auto[curLoc][section][index] === 0) { 
+        if (auto[curLoc][section][index] === 0) { /* set wage / 2sec to be collected by interval in App */
             const newAuto = [...auto];
             newAuto[curLoc][section][index] = factor;
             setAuto(newAuto);
@@ -63,20 +63,17 @@ function Auto ({ auto, setAuto, curLoc, section, index, machines }: AutoProps) {
 
 function Semi ({ balance, setBalance, semi, setSemi, curLoc, section, index, machines, setMachines }: SemiProps) {
 
-    const [wage, setWage] = useState(Number(machines[curLoc][section][index][6]));
     const toggleMine = () => {
         let factor: number = Math.round((Number(machines[curLoc][section][index][2]) * 2000 / Number(machines[curLoc][section][index][4])));
-        if (wage === 0) { 
+        if (semi[curLoc][section][index] === 0) { /* set wage / 2sec to be collected by interval in App */
             const newSemi = [...semi];
             newSemi[curLoc][section][index] = factor;
             setSemi(newSemi);
-            setWage(factor); 
         } else { 
-            collect();
+            collect();  /* QOL, collect money before switching off miner */
             const newSemi = [...semi];
             newSemi[curLoc][section][index] = 0;
             setSemi(newSemi);
-            setWage(0); 
         }
     }
 
@@ -89,8 +86,8 @@ function Semi ({ balance, setBalance, semi, setSemi, curLoc, section, index, mac
 
     return (
         <>
-            <button onClick={toggleMine}>{ wage !== 0 ? "Stop Mining" : "Semi Mine" }</button>
-            { wage !== 0 && <button onClick={collect}>Collect - { machines[curLoc][section][index][6] }</button> }
+            <button onClick={toggleMine}>{ semi[curLoc][section][index] !== 0 ? "Stop Mining" : "Semi Mine" }</button>
+            { semi[curLoc][section][index] !== 0 && <button onClick={collect}>Collect - { machines[curLoc][section][index][6] }</button> }
         </>
     )
 }
@@ -99,14 +96,18 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
 
     const cap: number = machines[curLoc][section][index][1] ? 5 : 10;
     const buyMod = (e: any) => {
+        /* 2 for GPUs, 4 for Fans */
         let val = Number(e.target.value);
-        let cost = (cap - Number(machines[curLoc][section][index][val + 1])) * 2 ** 10;
+        /* cost scales with each modification bought */
+        let cost = ((cap + 1) - Number(machines[curLoc][section][index][val + 1])) * 2 ** 10;
         if (Number(machines[curLoc][section][index][val + 1]) > 0 && balance >= cost) {
-            let nerf: boolean = Number(machines[curLoc][section][index][val + 1]) > 5;
+            /* nerf 0-6, so upgrades 7-10 for desktops aren't ridiculously OP */
+            let nerf: boolean = Number(machines[curLoc][section][index][val + 1]) > 3;
             let machs = [...machines];
+            /* decrease upgrades left */
             machs[curLoc][section][index][val + 1] = Number(machs[curLoc][section][index][val + 1]) - 1;
             switch(val) {
-                case 2: machs[curLoc][section][index][val] = Math.round(Number(machs[curLoc][section][index][val]) * (nerf ? 1.5 : 2)); break;
+                case 2: machs[curLoc][section][index][val] = Math.round(Number(machs[curLoc][section][index][val]) * (nerf && cap === 10 ? 1.5 : 2)); break;
                 case 4: machs[curLoc][section][index][val] = Number(machs[curLoc][section][index][val]) - 150; break;
                 default: break;
             }
@@ -115,6 +116,7 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
         }
     }
 
+    /* for use in machine GUI and upgrading */
     let gen: string = "Manual";
     let cost: number = 250;
     switch (machines[curLoc][section][index][0]) {
@@ -128,6 +130,7 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
             switch (Number(machines[curLoc][section][index][0])) {
                 case Phase.Manual: machs[curLoc][section][index][0] = Phase.Semi; break;
                 case Phase.Semi: 
+                    /* collect semi-vault and clear semi-array for callback interval before upgrade */
                     machs[curLoc][section][index][0] = Phase.Auto;
                     cost -= Number(machs[curLoc][section][index][6]);
                     const newSemi = [...semi];
@@ -150,6 +153,7 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
         setBalance(balance + Number(machines[curLoc][section][index][2]));
     }
 
+    /* calculating sell price */
     let price = machines[curLoc][section][index][1] ? 500 : 3000;
     price += ((Number(machines[curLoc][section][index][2]) * 2) + (2000 - Number(machines[curLoc][section][index][4])));
     switch (machines[curLoc][section][index][0]) {
@@ -161,6 +165,7 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
 
     const sellMachine = () => {
         const machs = [...machines];
+        /* clear semi and auto arrays when selling */
         if (machines[curLoc][section][index][0] == Phase.Semi) {
             const newSemi = [...semi];
             newSemi[curLoc][section][index] = 0;
@@ -213,6 +218,7 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
 function Machine ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc, section, index, machines, setMachines }: MachineProps) {
 
     const buyMachine = (e: any) => {
+        /* cost stored as value in HTML button */
         let target: number = Number(e.target.value);
         if (balance >= target) {
             const mach = [...machines];

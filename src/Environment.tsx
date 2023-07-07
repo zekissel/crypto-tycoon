@@ -13,7 +13,7 @@ interface EnvProps {
     locations: (string | number)[][];
 
     /* destructuring of machines: machines[location(0-5)][section(4 machines/section)][index in section(0-3)][index of state variable] */
-    /* variable index: -> [<phase>(0), <isLaptop>(1), <wage>(2), <wage upgrades left>(3), <cooldown>(4), <cooldown upgrades left>(5)]  */
+    /* variable index: -> [<phase>(0), <isLaptop>(1), <wage>(2), <wage upgrades left>(3), <cooldown>(4), <cooldown upgrades left>(5), <semi vault>(6)]  */
     machines: (number | boolean)[][][][];
     setMachines: React.Dispatch<React.SetStateAction<(number | boolean)[][][][]>>;
 }

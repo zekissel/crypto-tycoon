@@ -17,9 +17,12 @@ function App() {
 
   const [machines, setMachines] = useState(m_arrays);
 
+  
   useEffect(() => {
+    /* callback runs every two seconds to search for semi + automatic machines currently mining */
     const interval = setInterval(() => {
       
+      /* auto mine -> set balance directly by wage declared in auto */
       let sum = 0;
       for (let loc of auto) {
         for (let sec of loc) {
@@ -30,6 +33,7 @@ function App() {
       }
       setBalance(balance + sum);
 
+      /* semi mine -> set machines[location][section][index][6 (vault)] to the wage declared in semi */
       let x = 0;
       const machs = [...machines];
       for (let loc of semi) {
@@ -49,6 +53,7 @@ function App() {
       setWage(sum);
 
     }, 2000);
+
     return () => clearInterval(interval);
   }, [balance, semi, auto, machines]);
 
