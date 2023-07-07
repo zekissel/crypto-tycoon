@@ -156,6 +156,8 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
         case Phase.Semi: price += 100; break;
         case Phase.Auto: price += 1000; break;
     }
+    const [confirm, setConfirm] = useState(false);
+    const confirmSell = () => setConfirm(!confirm);
 
     const sellMachine = () => {
         const machs = [...machines];
@@ -202,7 +204,7 @@ function MachineUI ({ balance, setBalance, semi, setSemi, auto, setAuto, curLoc,
             <h5>Wage: { machines[curLoc][section][index][2] } { Number(machines[curLoc][section][index][3]) > 0 && <button value={2} onClick={buyMod}>+{ machines[curLoc][section][index][1] ? "eGPU" : "GPU" } (-${ ((cap + 1) - Number(machines[curLoc][section][index][3])) * 2 ** 10 })</button> } | { cap - Number(machines[curLoc][section][index][3]) } / { cap } { machines[curLoc][section][index][1] ? "eGPUs" : "GPUs" }</h5>
             <h5>Cooldown: { Number(machines[curLoc][section][index][4]) / 1000.0}s { Number(machines[curLoc][section][index][5]) > 0 && <button value={4} onClick={buyMod}>+Fan (-${ ((cap + 1) - Number(machines[curLoc][section][index][5])) * 2 ** 10 })</button> } | { cap - Number(machines[curLoc][section][index][5]) } / { cap } Fans</h5>
 
-            <h5><button onClick={sellMachine}>Sell (+{ price })</button></h5>
+            <h5><button onClick={confirmSell}>Sell (+{ price })</button>{ confirm && <button onClick={sellMachine}>Confirm</button> }</h5>
 
         </>
     )
