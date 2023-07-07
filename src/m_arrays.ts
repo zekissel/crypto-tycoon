@@ -9,6 +9,8 @@ export const loca = [
     ['Mountain Retreat', 800000]
 ];
 
+// boards to keep track of the machines that are currently mining semi automatically (storing crypto) or automatically (straight to wallet)
+// number is crypto / 2 sec
 export const semiBoard = [
     [[0, 0, 0, 0]],
     [[0, 0, 0, 0], [0, 0, 0, 0]],
@@ -17,7 +19,6 @@ export const semiBoard = [
     [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
     [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
 ];
-
 export const autoBoard = [
     [[0, 0, 0, 0]],
     [[0, 0, 0, 0], [0, 0, 0, 0]],
@@ -34,8 +35,10 @@ export enum Phase {
     Semi,
     Auto
 }
-// [<phase>, <isLaptop>, <wage>, <wage upgrades left>, <cooldown>, <cooldown upgrades left>]
-const mach0 = [[[Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0]]];
+// [<phase>(0), <isLaptop>(1), <wage>(2), <wage upgrades left>(3), <cooldown>(4), <cooldown upgrades left>(5), <semi-miner bank>(6)]
+const mach0 = [
+    [[Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0]]
+];
 const mach1 = [
     [[Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0]],
     [[Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0], [Phase.None, true, 10, 5, 2000, 5, 0]],
